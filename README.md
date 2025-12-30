@@ -2,6 +2,8 @@
 
 > A decision observability layer for systems where outcomes are produced through multiple rules, evaluations, or ranking steps.
 
+![](./image.png)
+
 ## The 15-Minute Pitch: Why WhyFlow?
 
 Imagine you're building a system that recommends products to users. A user sees a recommendation, and it's completely wrong. Why?
