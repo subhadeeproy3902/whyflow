@@ -67,7 +67,7 @@ importers:
         specifier: 2.6.0
         version: 2.6.0
 
-  apps/docs:
+  apps/example:
     dependencies:
       '@repo/ui':
         specifier: workspace:*
