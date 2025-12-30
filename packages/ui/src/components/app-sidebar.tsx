@@ -148,9 +148,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
-        <div className="px-4 py-2 text-xs text-muted-foreground">
-          Created by <a href="https://github.com/subhadeeproy3902" className="underline">Subhadeep Roy</a>
-        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

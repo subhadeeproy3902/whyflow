@@ -2,42 +2,90 @@
 
 > A decision observability layer for systems where outcomes are produced through multiple rules, evaluations, or ranking steps.
 
-## What is WhyFlow?
+## The 15-Minute Pitch: Why WhyFlow?
 
-WhyFlow is a **decision observability system** that captures and visualizes *why* a system produced a specific outcome.
+Imagine you're building a system that recommends products to users. A user sees a recommendation, and it's completely wrong. Why?
 
-It is **not AI-specific**. It works for **AI-driven, rule-based, heuristic, and hybrid decision pipelines**.
+Did the initial data pull fail? Did a filter remove the correct items? Did the ranking algorithm deprioritize the best choice?
 
-Traditional logging tells you *what* happened. Distributed tracing tells you *what functions* were called.
+Traditional tools don't give you the full picture:
+-   **Logs** tell you *what* happened, but the "why" is buried in a sea of text.
+-   **Traces** show you which functions were called, but they don't explain the logic behind the decisions.
+-   **Metrics** give you aggregated data, but they can't explain a single, specific outcome.
 
-**WhyFlow tells you *why* a decision was made.**
+**WhyFlow is different.** It's a **decision observability system** that captures and visualizes the entire journey of a decision, from the initial input to the final outcome. It's not just for AI—it's for any system that makes decisions through a series of steps, whether they're rule-based, heuristic, or AI-driven.
 
-## The Problem
+With WhyFlow, you can finally answer the question: **"Why did the system make this decision?"**
 
-Modern software relies on multi-step, non-deterministic processes:
+## Core Concepts: The WhyFlow Mental Model
 
-- An LLM generates search keywords from a product description
-- A search API returns thousands of results
-- Filters narrow down candidates based on business rules
-- A ranking algorithm selects the final output
+At the heart of WhyFlow are two simple concepts:
 
-These systems are notoriously difficult to debug. When the final output is wrong, you're left reverse-engineering the entire pipeline.
+### 1. `DecisionExecution`
 
-**WhyFlow gives you visibility into each decision point**, making it easy to identify where things went wrong.
+A `DecisionExecution` is a recording of a single, end-to-end decision-making process. Think of it as a flight recorder for your system's logic. It captures everything that happened during a specific transaction, from the moment a request comes in to the moment a decision is made.
 
-## Installation
+Each `DecisionExecution` has:
+-   A unique `executionId`
+-   A descriptive `name` (e.g., "Product Recommendation Pipeline")
+-   A `timestamp`
+-   An ordered list of `DecisionSteps`
+
+### 2. `DecisionStep`
+
+A `DecisionStep` is a meaningful moment in the decision-making process. It's not just a function call—it's a point where a decision is made, data is transformed, or the set of possible outcomes is narrowed down.
+
+Each `DecisionStep` can have:
+-   An `input` and `output`
+-   A `rationale` (a human-readable explanation of what happened)
+-   `metadata` for any other relevant information
+
+By combining these two concepts, you can create a complete, auditable record of every decision your system makes.
+
+## High-Level Architecture
+
+WhyFlow is a monorepo that contains everything you need to get started with decision observability:
+
+```
+/
+├── apps/
+│   ├── example/  # A demo dashboard that visualizes DecisionExecutions
+│   └── docs/     # The documentation site
+├── packages/
+│   ├── core/     # The @whyflow/core SDK
+│   └── ui/       # Shared UI components
+```
+
+-   **`@whyflow/core`**: The lightweight, framework-agnostic SDK that you'll use to instrument your code.
+-   **`example`**: A Next.js application that provides a visual "decision debugger" for your `DecisionExecution` data.
+-   **`docs`**: A Fumadocs site with detailed documentation and guides.
+-   **`ui`**: A set of shared React components used by the `example` and `docs` applications.
+
+## Quick Start: A Guided Tour
+
+Let's walk through a simple example of how to use WhyFlow to instrument a competitor selection pipeline.
+
+### 1. Install the SDK
 
 ```bash
 pnpm add @whyflow/core
 ```
 
-## Quick Start
+### 2. Create a `DecisionExecution`
+
+First, create a new `DecisionExecution` to represent the entire process:
 
 ```typescript
 import { Execution } from "@whyflow/core";
 
 const execution = new Execution("Competitor Selection Pipeline");
+```
 
+### 3. Add `DecisionSteps`
+
+Next, add a `DecisionStep` for each meaningful event in the process:
+
+```typescript
 execution.addStep({
   name: "Generate Search Keywords",
   input: {
@@ -58,28 +106,48 @@ execution.addStep({
     priceRange: { min: 15, max: 60 },
   },
 });
+```
 
+### 4. Get the `DecisionExecution` Data
+
+Finally, get the JSON representation of the `DecisionExecution`:
+
+```typescript
 const executionData = execution.toJSON();
 ```
 
-## Features
+You can now send this data to the WhyFlow decision debugger (the `example` app) to visualize the entire process.
 
-- **Lightweight SDK** - Minimal, explicit API with no magic
-- **Decision Trail Capture** - Record inputs, outputs, and reasoning at each step
-- **Visual Dashboard** - Debug multi-step pipelines with a clear UI
-- **General Purpose** - Works for any decision pipeline, not just AI
-- **JSON-Safe** - Everything is serializable for storage and transmission
+## The Decision Debugger
 
-## Architecture
+The `example` application provides a powerful UI for visualizing and debugging your `DecisionExecutions`.
 
-This monorepo contains:
+-   **Step Timeline**: A vertical timeline that shows each `DecisionStep` in the order it occurred.
+-   **Input/Output Viewer**: A JSON viewer that lets you inspect the `input` and `output` of each `DecisionStep`.
+-   **Rationale Display**: A prominent display for the `rationale` of each `DecisionStep`, so you can understand the "why" at a glance.
 
-- **`packages/core`** - The `@whyflow/core` SDK
-- **`apps/example`** - Demo dashboard showing a competitor selection pipeline
-- **`apps/docs`** - Documentation site built with Fumadocs
-- **`packages/ui`** - Shared UI components
+## Use Cases
+
+WhyFlow is a general-purpose tool that can be used in a wide variety of scenarios:
+
+-   **E-commerce**: Understand why a specific product was recommended to a user.
+-   **Fintech**: Audit the steps of a loan application or fraud detection process.
+-   **Adtech**: Debug the logic of an ad targeting or bidding system.
+-   **Search**: Analyze the results of a search ranking algorithm.
+
+## What WhyFlow Is Not
+
+WhyFlow is **not**:
+
+-   A tracing system (use Jaeger, Zipkin for that)
+-   A logging framework (use Winston, Pino for that)
+-   A metrics platform (use Prometheus, Datadog for that)
+-   An AI framework
+-   A rules engine
 
 ## Development
+
+To get started with development, clone the repository and install the dependencies:
 
 ```bash
 pnpm install
@@ -97,39 +165,3 @@ Run the documentation site:
 ```bash
 pnpm dev --filter docs
 ```
-
-## Use Cases
-
-WhyFlow is designed for systems that make decisions through multiple steps:
-
-- **Competitor discovery** - Find and rank competitor products
-- **Content recommendation** - Select relevant content from large datasets
-- **Lead scoring** - Evaluate and prioritize sales leads
-- **Fraud detection** - Assess risk through multiple rule layers
-- **Search ranking** - Determine result ordering
-
-Any system where you need to understand *why* a particular outcome was selected.
-
-## What WhyFlow is Not
-
-WhyFlow is **not**:
-
-- A tracing system (use Jaeger, Zipkin for that)
-- A logging framework (use Winston, Pino for that)
-- A metrics platform (use Prometheus, Datadog for that)
-- An AI framework
-- A rules engine
-
-## Documentation
-
-Full documentation is available at `/apps/docs`:
-
-- Introduction to decision observability
-- Core concepts and mental model
-- Integration guide
-- Dashboard usage
-- Data model reference
-
-## License
-
-MIT
