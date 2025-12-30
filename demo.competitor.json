@@ -1,0 +1,42 @@
+{
+  "executionId": "demo_competitor_001",
+  "name": "Competitor Selection Demo",
+  "timestamp": "2025-12-30T12:30:00.000Z",
+  "steps": [
+    {
+      "name": "Keyword Generation",
+      "input": {
+        "product_title": "Stainless Steel Water Bottle 32oz Insulated",
+        "category": "Sports & Outdoors"
+      },
+      "output": {
+        "keywords": [
+          "stainless steel water bottle insulated",
+          "vacuum insulated bottle 32oz"
+        ],
+        "model": "gpt-4"
+      },
+      "rationale": "Extracted key product attributes: material, capacity, feature",
+      "metadata": { "step_type": "llm_generation" }
+    },
+    {
+      "name": "Candidate Search",
+      "input": { "keyword": "stainless steel water bottle insulated", "limit": 50 },
+      "output": { "total_results": 2847, "candidates_fetched": 50 },
+      "rationale": "Fetched top 50 results by relevance",
+      "metadata": { "step_type": "api_search", "search_provider": "mock_amazon_api" }
+    },
+    {
+      "name": "Rank and Select",
+      "input": { "candidates_count": 8 },
+      "ranking_criteria": { "primary": "review_count", "secondary": "rating" },
+      "ranked_candidates": [
+        { "rank": 1, "asin": "B0COMP01", "title": "HydroFlask 32oz Wide Mouth", "total_score": 0.92 },
+        { "rank": 2, "asin": "B0COMP02", "title": "Yeti Rambler 26oz", "total_score": 0.74 }
+      ],
+      "output": { "selected_competitor": { "asin": "B0COMP01", "title": "HydroFlask 32oz" } },
+      "rationale": "Selected highest scoring competitor",
+      "metadata": { "step_type": "ranking", "selection_reason": "Highest combined score" }
+    }
+  ]
+}

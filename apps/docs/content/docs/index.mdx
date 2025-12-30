@@ -1,7 +1,54 @@
 ---
-title: Hello World
+title: WhyFlow Documentation
+description: Decision observability for multi-step systems
 ---
 
-## Introduction
+import { Card, Cards } from 'fumadocs-ui/components/card';
 
-I love Anime.
+## Welcome to WhyFlow
+
+WhyFlow is a decision observability system that helps you understand *why* your multi-step systems produce specific outcomes.
+
+It's designed for AI-driven, rule-based, heuristic, and hybrid decision pipelines.
+
+<Cards>
+  <Card title="Introduction" href="/docs/introduction">
+    Learn what decision observability is and why it matters
+  </Card>
+  <Card title="Core Concepts" href="/docs/core-concepts">
+    Understand the WhyFlow mental model
+  </Card>
+  <Card title="Getting Started" href="/docs/getting-started">
+    Integrate WhyFlow into your system
+  </Card>
+  <Card title="Dashboard Guide" href="/docs/dashboard">
+    Learn how to debug with WhyFlow
+  </Card>
+</Cards>
+
+## Quick Start
+
+Install WhyFlow:
+
+```bash
+pnpm add @whyflow/core
+```
+
+Create an execution and add decision steps:
+
+```typescript
+import { Execution } from "@whyflow/core";
+
+const execution = new Execution("My Pipeline");
+
+execution.addStep({
+  name: "Filter Candidates",
+  input: { candidates: 100 },
+  output: { qualified: 23 },
+  rationale: "Applied business rules to narrow candidates",
+});
+
+const data = execution.toJSON();
+```
+
+View the complete decision trail in the dashboard to debug and understand your system's decisions.

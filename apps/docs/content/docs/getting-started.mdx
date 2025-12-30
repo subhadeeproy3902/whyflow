@@ -1,0 +1,122 @@
+---
+title: Getting Started
+description: Integrate WhyFlow into your system
+---
+
+## Installation
+
+```bash
+pnpm add @whyflow/core
+```
+
+## Basic Usage
+
+### 1. Create an Execution
+
+Start by creating a `DecisionExecution` for your pipeline run:
+
+```typescript
+import { Execution } from "@whyflow/core";
+
+const execution = new Execution("Product Recommendation Pipeline");
+```
+
+### 2. Add Decision Steps
+
+For each meaningful decision point, add a step:
+
+```typescript
+execution.addStep({
+  name: "Filter by Price Range",
+  input: {
+    candidates: 50,
+    priceMin: 10,
+    priceMax: 100,
+  },
+  output: {
+    qualified: 12,
+    rejected: 38,
+  },
+  rationale: "Filtered products to match customer budget constraints",
+  metadata: {
+    priceRange: { min: 10, max: 100 },
+    rejectionReasons: {
+      tooExpensive: 25,
+      tooCheap: 13,
+    },
+  },
+});
+```
+
+### 3. Export the Execution
+
+When your pipeline completes, export the execution data:
+
+```typescript
+const executionData = execution.toJSON();
+```
+
+This gives you a complete, serializable record of the decision trail.
+
+## Complete Example
+
+```typescript
+import { Execution } from "@whyflow/core";
+
+function selectCompetitor(productId: string) {
+  const execution = new Execution("Competitor Selection", `exec_${productId}`);
+
+  execution.addStep({
+    name: "Generate Keywords",
+    input: { productTitle: "Stainless Steel Water Bottle" },
+    output: { keywords: ["water bottle", "insulated bottle"] },
+    rationale: "Extracted core product attributes for search",
+  });
+
+  execution.addStep({
+    name: "Search Candidates",
+    input: { keyword: "water bottle", limit: 50 },
+    output: { totalResults: 2847, fetched: 50 },
+    rationale: "Retrieved top 50 matches by relevance",
+  });
+
+  execution.addStep({
+    name: "Apply Filters",
+    input: { candidates: 50 },
+    output: { passed: 12, failed: 38 },
+    rationale: "Applied price, rating, and review filters",
+    metadata: {
+      filters: {
+        priceRange: { min: 15, max: 60 },
+        minRating: 3.8,
+        minReviews: 100,
+      },
+    },
+  });
+
+  return execution.toJSON();
+}
+```
+
+## Best Practices
+
+### Capture Intent, Not Implementation
+
+Don't log every function call. Focus on **decision points** where choices are made.
+
+### Be Specific in Rationale
+
+Instead of "Applied filters", write "Rejected 25 products: price above $60 max".
+
+### Use Metadata for Details
+
+Put detailed evaluations, rankings, and rule results in `metadata`. Keep `input` and `output` high-level.
+
+### Keep It JSON-Safe
+
+Everything must be serializable. No functions, circular references, or complex objects.
+
+## Next Steps
+
+- [Dashboard Guide](/docs/dashboard) - Learn how to visualize executions
+- [Data Model](/docs/data-model) - Understand the structure in depth

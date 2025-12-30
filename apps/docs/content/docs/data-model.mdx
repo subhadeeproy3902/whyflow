@@ -1,0 +1,185 @@
+---
+title: Data Model
+description: Understanding WhyFlow's data structures
+---
+
+## DecisionExecution
+
+The top-level structure representing a complete pipeline run.
+
+```typescript
+interface DecisionExecution {
+  executionId: string;
+  name: string;
+  timestamp: string;
+  steps: DecisionStep[];
+}
+```
+
+### Fields
+
+- **executionId**: Unique identifier for this execution (auto-generated or custom)
+- **name**: Human-readable name describing what this pipeline does
+- **timestamp**: ISO 8601 timestamp of when the execution started
+- **steps**: Ordered array of decision steps
+
+## DecisionStep
+
+Represents a single decision point in the pipeline.
+
+```typescript
+interface DecisionStep {
+  name: string;
+  input?: unknown;
+  output?: unknown;
+  rationale?: string;
+  metadata?: Record<string, unknown>;
+}
+```
+
+### Fields
+
+- **name**: What decision is being made (required)
+- **input**: Data that went into this step (optional)
+- **output**: Data that came out of this step (optional)
+- **rationale**: Human-readable explanation of why this decision was made (optional)
+- **metadata**: Additional structured data like filters, evaluations, rankings (optional)
+
+## Design Principles
+
+### Everything is JSON-Safe
+
+All data must be serializable to JSON. This means:
+
+- No functions or methods
+- No circular references
+- No complex class instances
+- Use plain objects, arrays, strings, numbers, booleans, and null
+
+### Flexible Schema
+
+The data model intentionally uses `unknown` for input/output and `Record<string, unknown>` for metadata.
+
+This allows WhyFlow to adapt to different domains without forcing a rigid schema.
+
+### Explicit Over Implicit
+
+There's no auto-instrumentation or magic. You must explicitly add steps and data.
+
+This keeps the SDK simple and gives you full control over what's captured.
+
+## Example Structures
+
+### Simple Filter Step
+
+```json
+{
+  "name": "Price Filter",
+  "input": {
+    "candidates": 100,
+    "priceRange": { "min": 20, "max": 50 }
+  },
+  "output": {
+    "passed": 23,
+    "rejected": 77
+  },
+  "rationale": "Filtered to products within $20-$50 range"
+}
+```
+
+### Detailed Evaluation Step
+
+```json
+{
+  "name": "LLM Relevance Check",
+  "input": {
+    "candidates": 23,
+    "model": "gpt-4"
+  },
+  "output": {
+    "relevant": 15,
+    "irrelevant": 8
+  },
+  "rationale": "Removed accessories and replacement parts",
+  "metadata": {
+    "evaluations": [
+      {
+        "productId": "B001",
+        "isRelevant": true,
+        "confidence": 0.95
+      },
+      {
+        "productId": "B002",
+        "isRelevant": false,
+        "confidence": 0.87,
+        "reason": "Detected as accessory"
+      }
+    ]
+  }
+}
+```
+
+### Ranking Step
+
+```json
+{
+  "name": "Rank by Score",
+  "input": {
+    "candidates": 15
+  },
+  "output": {
+    "topCandidate": {
+      "productId": "B001",
+      "score": 0.92
+    }
+  },
+  "rationale": "Selected highest-scoring candidate based on reviews and rating",
+  "metadata": {
+    "rankingCriteria": {
+      "primary": "reviewCount",
+      "secondary": "rating"
+    },
+    "rankings": [
+      {
+        "rank": 1,
+        "productId": "B001",
+        "score": 0.92,
+        "reviewCount": 8932,
+        "rating": 4.5
+      },
+      {
+        "rank": 2,
+        "productId": "B003",
+        "score": 0.74,
+        "reviewCount": 5621,
+        "rating": 4.4
+      }
+    ]
+  }
+}
+```
+
+## What to Capture
+
+### Always Capture
+
+- **name**: Clear, descriptive decision name
+- **rationale**: Why this decision was made
+
+### Capture When Relevant
+
+- **input**: What data drove this decision
+- **output**: What came out of this decision
+- **metadata**: Detailed evaluations, rankings, filter results
+
+### Don't Capture
+
+- Internal implementation details
+- Temporary variables
+- Function call stacks
+- Performance metrics (use tracing for that)
+
+## Next Steps
+
+- [Getting Started](/docs/getting-started) - See usage examples
+- [Dashboard Guide](/docs/dashboard) - Learn how this data is visualized

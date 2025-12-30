@@ -1,0 +1,13 @@
+{
+  "title": "WhyFlow",
+  "description": "An open-source framework for building decision-making applications powered by LLMs.",
+  "root": true,
+  "pages": [
+    "index",
+    "introduction",
+    "getting-started",
+    "core-concepts",
+    "data-models",
+    "dashboard"
+  ]
+}

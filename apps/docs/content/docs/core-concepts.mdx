@@ -1,0 +1,66 @@
+---
+title: Core Concepts
+description: Understanding decision observability
+---
+
+## Decision Observability
+
+Decision observability is about capturing *why* a system made a specific choice, not just *what* it did.
+
+This requires capturing:
+
+- The input to each decision point
+- The options or candidates being considered
+- The rules or evaluations applied
+- The rationale behind the selection
+- The final output
+
+## Key Concepts
+
+### DecisionExecution
+
+A `DecisionExecution` represents a single run of your decision pipeline from start to finish.
+
+It includes:
+
+- **executionId**: Unique identifier for this run
+- **name**: Human-readable name for the pipeline
+- **timestamp**: When the execution started
+- **steps**: Ordered list of decision steps
+
+### DecisionStep
+
+A `DecisionStep` represents a meaningful decision point in your pipeline, not just a function call.
+
+Each step can include:
+
+- **name**: What decision is being made
+- **input**: What went into this step
+- **output**: What came out of this step
+- **rationale**: Human-readable explanation of why
+- **metadata**: Additional context (filters applied, evaluations, rankings, etc.)
+
+## What Makes a Good Decision Step?
+
+A decision step should represent a **meaningful choice** in your system:
+
+✅ Good Examples:
+- "Filter Candidates by Price Range"
+- "Rank Products by Review Count"
+- "LLM Evaluation for Relevance"
+
+❌ Bad Examples:
+- "Call Database"
+- "Parse JSON"
+- "Log Result"
+
+## The Mental Model
+
+Think of WhyFlow as a **decision trail recorder**:
+
+1. Create an execution when your pipeline starts
+2. Add a step for each meaningful decision point
+3. Capture inputs, outputs, and reasoning at each step
+4. Visualize the complete trail in the dashboard
+
+The goal is to make debugging feel like reading a story of how your system arrived at its conclusion.

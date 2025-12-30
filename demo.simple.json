@@ -1,0 +1,21 @@
+{
+  "executionId": "demo_simple_001",
+  "name": "Simple Demo Execution",
+  "timestamp": "2025-12-30T12:00:00.000Z",
+  "steps": [
+    {
+      "name": "Step 1 - Ingest",
+      "input": { "text": "sample input" },
+      "output": { "items": ["a", "b"] },
+      "rationale": "Ingested input and normalized fields",
+      "metadata": { "step_type": "ingest" }
+    },
+    {
+      "name": "Step 2 - Score",
+      "input": { "items": ["a", "b"] },
+      "output": { "scores": [0.9, 0.2] },
+      "rationale": "Scored candidates using simple heuristic",
+      "metadata": { "step_type": "scoring", "model": "heuristic" }
+    }
+  ]
+}

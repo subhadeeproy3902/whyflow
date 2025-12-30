@@ -1,0 +1,129 @@
+---
+title: Dashboard Guide
+description: How to read and debug with WhyFlow
+---
+
+## Overview
+
+The WhyFlow dashboard visualizes a single decision execution, showing you the complete trail from input to final output.
+
+## Layout
+
+The dashboard has three main areas:
+
+### 1. Header
+
+Shows execution metadata:
+- Execution name
+- Execution ID
+- Timestamp
+- Total step count
+
+### 2. Step Timeline (Left Sidebar)
+
+A vertical list of all decision steps in order. Click any step to view its details.
+
+Each step shows:
+- Step name
+- Step type (from metadata)
+- Step number
+
+### 3. Detail Panel (Main Area)
+
+Shows the selected step's complete information:
+- **Rationale**: Why this decision was made (prominently displayed)
+- **Input**: Data that went into the step
+- **Output**: Data that came out of the step
+- **Metadata**: Additional context like filters, evaluations, rankings
+
+## Reading a Decision Trail
+
+### Start at the Top
+
+Begin with step 1 and work your way down. Each step builds on the previous ones.
+
+### Focus on Rationale
+
+The rationale field explains *why* a decision was made. This is the most important part for debugging.
+
+### Check the Numbers
+
+Look for unexpected drops or spikes:
+- "50 candidates → 2 qualified" suggests filters might be too strict
+- "1000 results → 800 qualified" suggests filters might be too loose
+
+### Examine Failed Items
+
+When available, metadata shows individual evaluations. Look for patterns in failures:
+- Are good candidates being filtered out?
+- Are irrelevant items passing through?
+
+## Common Debugging Patterns
+
+### Too Few Results
+
+If the final output has too few options:
+
+1. Check filter steps - are thresholds too strict?
+2. Look at the search step - did it retrieve enough candidates?
+3. Examine evaluation steps - is the LLM too conservative?
+
+### Wrong Output Selected
+
+If the final selection is incorrect:
+
+1. Check the ranking step - are criteria appropriate?
+2. Look at earlier filters - was the correct option eliminated?
+3. Review search keywords - did they match the intent?
+
+### Unexpected Eliminations
+
+If good candidates are being filtered out:
+
+1. Find the step where they were eliminated
+2. Check the rationale for that step
+3. Look at the specific filter or rule that caused rejection
+4. Adjust thresholds or logic accordingly
+
+## Example Walkthrough
+
+Let's debug a competitor selection that picked the wrong product:
+
+**Step 1: Keyword Generation**
+- Input: "Premium Titanium Water Bottle"
+- Output: ["water bottle", "premium bottle"]
+- Rationale: "Extracted core attributes"
+
+**Issue**: Missing "titanium" - this might cause us to match non-titanium bottles.
+
+**Step 2: Candidate Search**
+- Input: "water bottle"
+- Output: 2847 results, fetched 50
+- Rationale: "Retrieved by relevance"
+
+**Step 3: Apply Filters**
+- Input: 50 candidates
+- Output: 12 qualified
+- Metadata shows price filter eliminated 25 candidates
+
+**Issue**: Check if titanium bottles were excluded due to price.
+
+**Step 4: Rank and Select**
+- Selected: "Generic Steel Bottle" (rank 1, score 0.92)
+- Rejected: "Premium Titanium Bottle" (rank 5, score 0.63)
+
+**Root cause**: Keywords in step 1 didn't include "titanium", so the search didn't prioritize titanium bottles. The filter then eliminated them for being "too expensive" compared to generic steel bottles.
+
+**Fix**: Improve keyword extraction to capture material type.
+
+## Tips
+
+- **Read top to bottom**: Follow the decision flow in order
+- **Trust the rationale**: It should explain each decision clearly
+- **Look for patterns**: Multiple similar failures suggest systematic issues
+- **Check your assumptions**: The data might reveal unexpected behavior
+
+## Next Steps
+
+- [Core Concepts](/docs/core-concepts) - Understand the mental model
+- [Data Model](/docs/data-model) - Learn what data to capture

@@ -26,28 +26,18 @@ import {
   SidebarRail,
 } from "@repo/ui/components/ui/sidebar"
 
-// This is sample data.
+// Sample data for the sidebar (kept minimal and neutral)
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Subhadeep Roy",
+    email: "github.com/subhadeeproy3902",
+    avatar: "/avatars/placeholder.png",
   },
   teams: [
     {
-      name: "Acme Inc",
+      name: "WhyFlow",
       logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      plan: "Demo",
     },
   ],
   navMain: [
@@ -139,19 +129,9 @@ const data = {
   ],
   projects: [
     {
-      name: "Design Engineering",
+      name: "Demo Project",
       url: "#",
       icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
     },
   ],
 }
@@ -168,6 +148,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
+        <div className="px-4 py-2 text-xs text-muted-foreground">
+          Created by <a href="https://github.com/subhadeeproy3902" className="underline">Subhadeep Roy</a>
+        </div>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

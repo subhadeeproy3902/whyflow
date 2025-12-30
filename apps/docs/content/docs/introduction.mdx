@@ -1,0 +1,51 @@
+---
+title: Introduction
+description: Decision observability for multi-step systems
+---
+
+## What is WhyFlow?
+
+WhyFlow is a **decision observability system** that captures and visualizes *why* a system produced a specific outcome.
+
+It works for AI-driven, rule-based, heuristic, and hybrid decision pipelines.
+
+## The Problem
+
+Modern software increasingly relies on multi-step, non-deterministic processes where traditional logging and tracing fall short. You can see *what* happened, but not *why* a particular decision was made.
+
+Consider a competitor selection system for an e-commerce platform:
+
+1. Generate search keywords from a product description (LLM step)
+2. Search and retrieve candidate products (API step)
+3. Apply filters (price range, rating, reviews)
+4. Evaluate relevance with an LLM
+5. Rank and select the best match
+
+If the selected competitor is wrong, which step failed? Without visibility into each decision point, debugging becomes guesswork.
+
+## How WhyFlow Helps
+
+WhyFlow provides transparency into multi-step decision processes by:
+
+- Capturing decision context at each step: inputs, candidates, filters, outcomes, and reasoning
+- Making it easy to identify where things went wrong
+- Visualizing the complete decision trail for a given execution
+
+## WhyFlow vs Traditional Tracing
+
+| Aspect | Traditional Tracing | WhyFlow |
+|--------|---------------------|---------|
+| Focus | Performance & flow | Decision reasoning |
+| Data | Spans, timing, service calls | Candidates, filters, selection logic |
+| Question answered | "What happened?" | "Why this output?" |
+| Granularity | Function/service level | Business logic level |
+
+Traditional distributed tracing (Jaeger, Zipkin) answers: *"What functions were called and how long did they take?"*
+
+WhyFlow answers: *"Why did the system make this decision?"*
+
+## Next Steps
+
+- [Core Concepts](/docs/core-concepts) - Understand the WhyFlow mental model
+- [Getting Started](/docs/getting-started) - Integrate WhyFlow into your system
+- [Reading the Dashboard](/docs/dashboard) - How to debug with WhyFlow
