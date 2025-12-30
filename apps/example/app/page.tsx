@@ -36,7 +36,8 @@ export default function Page() {
     try {
       const response = await fetch("/api/competitor-selection");
       const data = await response.json();
-      setExecution(data);
+      const exec = data?.data ?? data;
+      setExecution(exec);
       setSelectedStep(0);
     } catch (error) {
       console.error("Failed to fetch demo data:", error);

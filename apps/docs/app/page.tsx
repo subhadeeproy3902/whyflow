@@ -1,11 +1,10 @@
 "use client"
 
-import { Button } from "@repo/ui/components/ui/button";
+import { redirect } from "next/navigation";
 
 export default function Page() {
+  redirect("/docs/");
   return (
-    <main>
-      <Button>Click me</Button>
-    </main>
+    <></>
   );
 }
