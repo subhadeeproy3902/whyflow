@@ -4,7 +4,7 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomOneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 import { Separator } from "@repo/ui/components/ui/separator";
@@ -12,7 +12,7 @@ import type { DecisionStep } from "@whyflow/core";
 
 function CodeBlock({ language, value }: { language?: string; value: string }) {
   return (
-    <SyntaxHighlighter language={language || "text"} style={atomOneLight} wrapLongLines>
+    <SyntaxHighlighter language={language || "text"} style={atomDark} wrapLongLines>
       {value}
     </SyntaxHighlighter>
   );
@@ -33,9 +33,9 @@ export default function StepDetail({ step, stepNumber }: { step: DecisionStep; s
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  code({ node, inline, className, children }) {
+                  code({ node, className, children }) {
                     const match = /language-(\w+)/.exec(className || "");
-                    return !inline && match ? (
+                    return match ? (
                       <CodeBlock language={match[1]} value={String(children).replace(/\n$/, "")} />
                     ) : (
                       <code className={className}>{children}</code>

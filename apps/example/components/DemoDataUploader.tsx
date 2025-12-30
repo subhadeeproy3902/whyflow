@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Textarea } from "@repo/ui/components/ui/textarea";
 
 export default function DemoDataUploader({ onLoad }: { onLoad: (json: any) => void }) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function handleLoadFromText() {
     try {
@@ -37,7 +38,7 @@ export default function DemoDataUploader({ onLoad }: { onLoad: (json: any) => vo
   }
 
   return (
-    <div className="p-4">
+    <div className="p-0">
       <h4 className="text-sm font-semibold mb-2">Load Demo Data</h4>
 
       <label className="mb-2 inline-block text-xs text-muted-foreground">Paste JSON</label>
@@ -51,8 +52,21 @@ export default function DemoDataUploader({ onLoad }: { onLoad: (json: any) => vo
       <div className="mt-2 flex items-center gap-2">
         <Button onClick={handleLoadFromText}>Load from Paste</Button>
         <label className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">or upload</span>
-          <input type="file" accept="application/json,.json" onChange={handleFile} className="ml-2" />
+          <span className="text-xs text-muted-foreground">or</span>
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Upload JSON
+          </Button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={handleFile}
+            className="hidden"
+          />
         </label>
       </div>
 

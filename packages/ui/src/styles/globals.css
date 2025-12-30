@@ -132,3 +132,7 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
+.react-flow__panel.react-flow__attribution {
+  display: none !important;
+}
