@@ -1,8 +1,7 @@
 "use client";
 
 import DemoDataUploader from "@/components/DemoDataUploader";
-import StepWiseWorkflow from "@/components/StepWiseWorkflow"; // Replaces SidebarSteps
-import { generateCompetitorSelectionExecution } from "@/lib/demo-data";
+import StepWiseWorkflow from "@/components/StepWiseWorkflow";
 import { AppSidebar } from "@repo/ui/components/app-sidebar";
 import { Badge } from "@repo/ui/components/ui/badge";
 import {
@@ -11,6 +10,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@repo/ui/components/ui/breadcrumb";
+import { Button } from "@repo/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 import { Separator } from "@repo/ui/components/ui/separator";
 import {
@@ -20,18 +20,38 @@ import {
 } from "@repo/ui/components/ui/sidebar";
 import type { DecisionExecution, DecisionStep } from "@whyflow/core";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { LoaderCircle } from "lucide-react";
 
 export default function Page() {
-  const [execution, setExecution] = useState<DecisionExecution>(
-    generateCompetitorSelectionExecution()
-  );
+  const [execution, setExecution] = useState<DecisionExecution | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedStep, setSelectedStep] = useState<number>(0);
 
-  const currentStep = execution.steps[selectedStep]!;
+  const handleRunDemo = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/competitor-selection");
+      const data = await response.json();
+      setExecution(data);
+      setSelectedStep(0);
+    } catch (error) {
+      console.error("Failed to fetch demo data:", error);
+      // You could add a user-facing error message here
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSetExecution = (newExecution: DecisionExecution) => {
+    setExecution(newExecution);
+    setSelectedStep(0);
+  }
+
+  const currentStep = execution?.steps[selectedStep]!;
 
   return (
     <SidebarProvider>
@@ -49,44 +69,82 @@ export default function Page() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-          <div className="ml-auto flex items-center gap-2 px-4">
-            <Badge variant="secondary">{execution.steps.length} steps</Badge>
-            <span className="text-muted-foreground text-xs">{execution.executionId}</span>
-          </div>
+          {execution && (
+            <div className="ml-auto flex items-center gap-2 px-4">
+              <Badge variant="secondary">{execution.steps.length} steps</Badge>
+              <span className="text-muted-foreground text-xs">
+                {execution.executionId}
+              </span>
+            </div>
+          )}
         </header>
 
-        <div className="flex h-full overflow-hidden">
-          {/* LEFT PANEL: Workflow Canvas (Replaces SidebarSteps) */}
-          <aside className="border-r h-full relative flex flex-2 flex-col bg-background">
-             <div className="p-4 border-b bg-muted/20 z-10">
+        {execution ? (
+          <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+            <aside className="border-r h-full relative flex flex-2 flex-col bg-background">
+              <div className="p-4 border-b bg-muted/20 z-10">
                 <h2 className="font-semibold text-sm">Workflow View</h2>
-                <p className="text-xs text-muted-foreground">Select a node to view details</p>
-             </div>
-             <div className="flex-1 relative">
-                <StepWiseWorkflow 
-                  execution={execution} 
-                  selected={selectedStep} 
-                  onSelect={(i) => setSelectedStep(i)} 
+                <p className="text-xs text-muted-foreground">
+                  Select a node to view details
+                </p>
+              </div>
+              <div className="flex-1 relative">
+                <StepWiseWorkflow
+                  execution={execution}
+                  selected={selectedStep}
+                  onSelect={(i) => setSelectedStep(i)}
                 />
-             </div>
-          </aside>
+              </div>
+            </aside>
 
-          {/* RIGHT PANEL: Detail View (Stays as is) */}
-          <main className="overflow-y-auto flex-1 h-full p-4">
-            <div className="mb-6">
-              <DemoDataUploader
-                onLoad={json => {
-                  // attempt to coerce into DecisionExecution shape if possible
-                  if (json && Array.isArray(json.steps)) {
-                    setExecution(json);
-                    setSelectedStep(0);
-                  }
-                }}
-              />
-            </div>
-            <StepDetail step={currentStep} stepNumber={selectedStep + 1} />
-          </main>
-        </div>
+            <main className="overflow-y-auto flex-1 h-full p-4">
+              <div className="mb-6">
+                <DemoDataUploader
+                  onLoad={(json) => {
+                    if (json && Array.isArray(json.steps)) {
+                      handleSetExecution(json);
+                    }
+                  }}
+                />
+              </div>
+              <StepDetail step={currentStep} stepNumber={selectedStep + 1} />
+            </main>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-full bg-muted/20">
+            <Card className="w-full max-w-md text-center shadow-lg animate-in fade-in zoom-in-95">
+              <CardHeader>
+                <CardTitle className="text-2xl">
+                  Welcome to WhyFlow
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">
+                  Run the interactive demo to see how WhyFlow visualizes a
+                  decision-making process, or upload your own execution data.
+                </p>
+                <div className="flex flex-col gap-4">
+                  <Button onClick={handleRunDemo} disabled={isLoading} size="lg">
+                    {isLoading ? (
+                      <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    Run Interactive Demo
+                  </Button>
+                  <Separator>
+                    <span className="text-xs text-muted-foreground">OR</span>
+                  </Separator>
+                  <DemoDataUploader
+                    onLoad={(json) => {
+                      if (json && Array.isArray(json.steps)) {
+                        handleSetExecution(json);
+                      }
+                    }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </SidebarInset>
     </SidebarProvider>
   );
