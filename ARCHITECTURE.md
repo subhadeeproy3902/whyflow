@@ -1,272 +1,68 @@
-# WhyFlow — Master Project Prompt
+**Architecture — WhyFlow (Codebase Overview)**
 
-## Product Name
-**WhyFlow**
+**Overview**
+- **Purpose:** A decision-observability monorepo that captures, stores, and visualizes the reasoning behind outcomes produced by rule-based, heuristic, and AI-driven pipelines.
+- **Monorepo toolchain:** `pnpm` workspace + `turbo` for orchestration. UI primitives provided by `shadcn/ui` and shared components in `packages/ui`.
 
-## One-Line Description
-WhyFlow is a **decision observability system** that captures and visualizes *why* a system produced a specific outcome.
+**Top-level layout**
+- **`apps/`**: runnable apps and frontends.
+  - **`apps/example`**: focused decision debugger dashboard using `packages/ui` and deterministic demo fixtures.
+  - **`apps/docs`**: documentation site (Fumadocs) with MDX content under `apps/docs/content/docs`.
+- **`packages/`**: shared libraries and tooling.
+  - **`packages/core`**: minimal SDK (`@whyflow/core`) for constructing `DecisionExecution` payloads.
+  - **`packages/ui`**: shared UI components (shadcn wrappers and project-specific components).
+  - **`packages/*`**: other workspace packages such as lint/config and TypeScript presets.
 
-It is **not AI-specific**.  
-It works for **AI-driven, rule-based, heuristic, and hybrid decision pipelines**.
+**Core responsibilities**
+- **`@whyflow/core`** (packages/core)
+  - Construct and validate JSON-safe payloads: `DecisionExecution` and `DecisionStep`.
+  - Provide small helpers (serializers, types) only — no global state, no auto-instrumentation.
+- **UI layer** (packages/ui + apps/example)
+  - UI implements visualization rules (Execution Overview, Step Timeline, Step Detail) and consumes deterministic fixtures.
+  - Use only approved tokens: `primary`, `secondary`, `card`, `muted`, `border`, `foreground`.
+- **Docs** (apps/docs)
+  - All docs are MDX and live under `apps/docs/content/docs`.
+  - Engineering-first pages: mental model, SDK usage, data model, dashboard guide.
 
----
+**Data model & flow**
+- Integrator builds a `DecisionExecution` object (serializable) containing an ordered list of `DecisionStep` objects.
+- `DecisionExecution` is passed to the dashboard (or stored in fixtures) — dashboard renders deterministic views from that payload.
+- No runtime capture by default: integrator chooses what to record to avoid private-data leakage.
 
-## Core Philosophy
+**Demo and fixtures**
+- Demo data must be deterministic, static fixtures within `apps/example/lib`.
+- No network, randomness, async simulations, or LLM calls in fixtures.
 
-WhyFlow answers:
+**Build, dev, and testing**
+- Use `pnpm` at the workspace root to install and run scripts across packages.
+- `turbo` handles tasks like building, linting, and typechecks across packages for speed.
+- Tests (if present) should be package-scoped and runnable via `pnpm -w test`.
 
-> **“Why did the system make this decision?”**
+**Code & review rules (enforced practices)**
+- No `console` logs in committed code.
+- No TODOs or placeholder AI text in code or docs.
+- No unused exports, dead code, or unnecessary abstractions.
+- PR reviewers check: JSON-safety of payloads, no global state, usage of `packages/ui`, deterministic fixtures.
 
-This is **decision reasoning**, not:
-- performance tracing
-- logging
-- metrics
-- execution profiling
+**Developer workflow (recommended)**
+- Add UI components using `pnpm ui add <component-name>` (do not copy shadcn internals).
+- Keep SDK usage explicit — calls to create `DecisionExecution` are invoked by integrators (no hidden instrumentation).
+- Place documentation only under `apps/docs/content/docs` and author in MDX.
 
-The problem statement in `ASSIGNMENT.md` is the **source of truth** and must be strictly followed.
+**Operational considerations**
+- Keep demo apps runnable offline and deterministic across runs.
+- Avoid collecting private data by default; provide clear guidance in README on what integrators may record.
 
----
+**Files and hotspots to inspect when working**
+- `packages/core/src` — SDK types and constructors.
+- `packages/ui/src` — shared UI components and tokens.
+- `apps/example/lib` — demo fixtures and demo helper utilities.
+- `apps/docs/content/docs` — MDX documentation pages.
 
-## Monorepo Setup (Already Done)
-
-- **Turborepo** is set up
-- **shadcn/ui** is configured
-- **packages/ui** already contains shared UI components
-- **apps/example** already exists and contains a **dummy dashboard application**
-- **apps/docs** uses **Fumadocs**
-- Documentation is written **only in MDX**
-- All MDX files must live inside:
-
-```
-apps/docs/content/docs
-```
-
-
-Do **not** add documentation anywhere else.
-
----
-
-## Adding UI Components (Important)
-
-To add any new shadcn component, **always** use:
-
-```bash
-pnpm ui add <component-name>
-```
-
-
-Do not manually copy components.  
-Do not modify shadcn internals.
-
----
-
-## Theme & Design Constraints (Strict)
-
-- Absolute theme consistency across:
-  - Example dashboard
-  - Documentation site
-- Use **only existing shadcn tokens**:
-  - `primary`
-  - `secondary`
-  - `card`
-  - `muted`
-  - `border`
-  - `foreground`
-
-### Forbidden
-- No random colors
-- No inline hex values
-- No custom palettes
-- No visual experimentation
+**Next practical actions**
+- Add `FINAL_RESULT.md` describing verification steps and intern-friendly walkthrough (if desired).
+- Add a small example `DecisionExecution` fixture to `apps/example/lib/demo-data.ts` showing required fields.
 
 ---
 
-## Code Quality Rules (Non-Negotiable)
-
-- No `console logs`
-- No comments explaining obvious code
-- No TODOs
-- No placeholder AI text
-- No overengineering
-- No unnecessary abstractions
-- No unused exports
-- No dead code
-
-Code must feel **production-grade**, not tutorial-grade.
-
-
----
-
-## SDK — `@whyflow/core`
-
-### Purpose
-A **minimal, explicit SDK** for capturing decision executions.
-
-The SDK must:
-- Be domain-agnostic
-- Be fully serializable
-- Avoid rigid schemas
-- Capture *intent*, not implementation details
-- Require explicit developer actions
-
----
-
-### Core Concepts
-
-#### DecisionExecution
-Represents a single decision pipeline run.
-
-Includes:
-- executionId
-- name
-- timestamp
-- ordered decision steps
-
-#### DecisionStep
-Represents a **meaningful decision point**, not a function call.
-
-A step may include:
-- input
-- options / candidates
-- evaluations
-- output
-- rationale (human-readable explanation)
-
----
-
-### SDK Design Rules
-
-- No decorators
-- No global state
-- No magic hooks
-- No auto-instrumentation
-- Everything must be explicit
-- Everything must be JSON-safe
-
-The API should feel **boring and obvious** by design.
-
----
-
-## Dashboard App — `apps/example`
-
-### Purpose
-A **decision debugger**, not a marketing UI.
-
-The dashboard visualizes a **single decision execution**, end-to-end.
-
----
-
-### Dashboard Rules
-
-- Use **only components from `packages/ui`**
-- Use shadcn primitives:
-  - Card
-  - Badge
-  - Table
-  - Accordion
-- No charts unless they add real clarity
-- No unnecessary animations
-
----
-
-### Required Views
-
-#### Execution Overview
-- Execution name
-- Execution ID
-- Timestamp
-- Total step count
-
-#### Step Timeline
-- Vertical list of decision steps
-- Each step shows:
-  - name
-  - type
-  - short outcome summary
-
-#### Step Detail Panel
-- Input (structured JSON view)
-- Output (structured JSON view)
-- Rationale (plain text, prominent)
-- Candidate evaluation table (if present):
-  - pass / fail
-  - rule-level reasoning
-  - no custom colors or icons
-
----
-
-## Documentation — `apps/docs` (Fumadocs)
-
-### Writing Rules
-
-- Documentation is **MDX only**
-- Files must be placed in:
-
-```
-apps/docs/content/docs
-```
-
-- No autogenerated content
-- No marketing fluff
-- Clear, engineering-first tone
-
----
-
-### Required Docs Pages
-
-1. What is decision observability
-2. Why logs and traces are insufficient
-3. WhyFlow mental model
-4. SDK usage examples
-5. Data model explanation
-6. How to read the dashboard
-
----
-
-## Demo Data Rules
-
-- Deterministic dummy data only
-- No randomness
-- No async simulation
-- No API calls
-- No LLM calls
-
-The demo exists **only** to demonstrate observability.
-
----
-
-## README Positioning
-
-WhyFlow must be described as:
-
-> A decision observability layer for systems where outcomes are produced through multiple rules, evaluations, or ranking steps.
-
-Avoid describing it as:
-- an AI debugger
-- LLM observability
-- a tracing system
-- a logging framework
-- a metrics platform
-
----
-
-## Non-Goals
-
-WhyFlow is **not**:
-- A tracing system
-- A logging framework
-- A metrics platform
-- An AI framework
-- A rules engine
-
----
-
-## Final Intent
-
-This project should feel like:
-- Infrastructure built by someone who has debugged real systems
-- Something a founding engineer would ship
-- Minimal, intentional, opinionated
-- Final Result.md where there is a full outro of whats done and what can it do and how can an user notice the deeds and everything as a markdown doc for a intern beginner whom I need to provide
-
-No bullshit.
+This file summarizes the whole-repo architecture and where responsibilities live. Use it as a quick reference when making changes, opening PRs, or onboarding new contributors.
